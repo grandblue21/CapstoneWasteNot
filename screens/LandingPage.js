@@ -4,13 +4,14 @@ import { Image, Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 const LandingPage = ({ navigation }) => {  
     return (  
         <View style={styles.container}>
+        
             {/* Header */}
             <Image source={require('../assets/logos/normal.png')} style={styles.headerImage}></Image>
             <Text style={styles.headerText}>Hello Customer</Text>
             <Text style={styles.headerDescription}>Choose an option</Text>
 
             {/* Options */}
-            <TouchableOpacity style={styles.register}>
+            <TouchableOpacity style={styles.register} onPress={() => navigation.navigate('Register')}>
                 <Text style={styles.buttonText}>Register</Text>
             </TouchableOpacity>
 
@@ -20,7 +21,9 @@ const LandingPage = ({ navigation }) => {
 
         </View>
     );
-}  
+}
+
+// Styles
 const styles = StyleSheet.create({
     container: {
         flex: 1,

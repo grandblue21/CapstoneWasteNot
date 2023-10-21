@@ -1,12 +1,63 @@
-import React from 'react';
-import { Image, Text, View, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
+import React, { useState } from 'react';
+import { Keyboard, KeyboardAvoidingView, Image, Text, View, StyleSheet, TouchableOpacity, ToastAndroid } from 'react-native';
+import InputIcon from '../../components/auth/InputIcon';
+import { signInWithEmailAndPassword  } from 'firebase/auth';
+import { collection, getDocs, query, where, limit } from 'firebase/firestore';
+import FirebaseApp from '../../helpers/FirebaseApp';
 
-const Login = ({ navigation }) => {  
+const Login = ({ navigation }) => {
+
+    // Set Variables
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+
+    // Set Functions
+    const handleLoginPress = async () => {
+
+        // Dismiss keyboard
+        Keyboard.dismiss();
+
+        // Signed in 
+        const q = query(collection(FirebaseApp.firestore(), 'users'), where('username', '==', username), limit(1));
+        const userSnapshot = await getDocs(q);
+        let user;
+
+        // Get User
+        userSnapshot.forEach((doc) => user = doc.data());
+
+        // No such user exist
+        if (!user) {
+
+            // Empty password
+            setPassword('');
+
+            // Show notif
+            ToastAndroid.showWithGravity('Invalid login attempt', ToastAndroid.LONG, ToastAndroid.TOP);
+
+            return false;
+        }
+
+        // Sign In
+        signInWithEmailAndPassword(FirebaseApp.auth(), user.email, password).then((userCredential) => {
+            
+            // Show notif
+            ToastAndroid.showWithGravity('Welcome back, ' + [user.first_name, user.last_name].join(' '), ToastAndroid.LONG, ToastAndroid.TOP);
+        })
+        .catch((error) => {
+
+            // Empty password
+            setPassword('');
+
+            // Show notif
+            ToastAndroid.showWithGravity(error.message, ToastAndroid.LONG, ToastAndroid.TOP);
+        });
+    }
+
     return (  
-        <View style={styles.container}>
+        <KeyboardAvoidingView style={styles.container}>
 
-            <View style={styles.body}>
+            <View behavior={'height'} style={styles.body}>
+
                 {/* Header */}
                 <View style={styles.headerWrapper}>
                     <Image source={require('../../assets/logos/normal.png')} style={styles.headerImage}></Image>
@@ -14,36 +65,32 @@ const Login = ({ navigation }) => {
                 <Text style={styles.headerText}>Login</Text>
 
                 {/* Fields */}
-                <View style={styles.inputIconWrapper}>
-                    <FontAwesome name={'user-circle-o'} style={styles.inputIconUsername}/>
-                    <TextInput style={styles.input} placeholder={'Username'}/>
-                </View>
-                <View style={styles.inputIconWrapper}>
-                    <FontAwesome name={'lock'} style={Object.assign(styles.inputIconPassword)}/>
-                    <TextInput style={styles.input} placeholder={'Password'}/>
-                </View>
+                <InputIcon icon={'user-circle-o'} placeholder={'Username'} value={username} setValue={setUsername}  isSlimIcon={false} />
+                <InputIcon icon={'lock'} placeholder={'Password'} value={password} setValue={setPassword} isSecure={true} />
 
                 {/* Login */}
-                <TouchableOpacity style={styles.login}>
+                <TouchableOpacity style={styles.login} onPress={handleLoginPress}>
                     <Text style={styles.buttonText}>Login</Text>
                 </TouchableOpacity>
 
                 {/* Forgot Password */}
                 <Text style={{fontSize: 12}}>Forgot Password?</Text>
+
             </View>
 
             <View style={styles.foot}>
                 <View style={{flexDirection: 'row'}}>
                     {/* Don't have any account yet */}
                     <Text style={{fontSize: 12, marginRight: 5}}>Don't have any account yet?</Text>
-                    <Text style={{fontSize: 12, textDecorationLine: 'underline', color: '#389F4F'}}>Sign Up</Text>
+                    <Text style={{fontSize: 12, textDecorationLine: 'underline', color: '#389F4F'}} onPress={() => navigation.navigate('Register')}>Sign Up</Text>
                 </View>
             </View>
 
-        </View>
+        </KeyboardAvoidingView>
     );
 }
 
+// Styles
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -73,33 +120,6 @@ const styles = StyleSheet.create({
         marginTop: -20,
         marginBottom: 10,
         alignSelf: 'flex-start'
-    },
-    inputIconWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#fff',
-        borderWidth: 1,
-        borderColor: '#389F4F',
-        borderRadius: 5,
-        marginBottom: 20,
-        width: 300,
-        elevation: 10
-    },
-    inputIconUsername: {
-        width: 35,
-        fontSize: 31,
-        marginHorizontal: 10,
-        color: '#389F4F'
-    },
-    inputIconPassword: {
-        width: 35,
-        fontSize: 31,
-        marginHorizontal: 10,
-        paddingLeft: 5,
-        color: '#389F4F'
-    },
-    input: {
-        height: 45,
     },
     login: {
         height: 40,
