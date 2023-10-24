@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Keyboard, KeyboardAvoidingView, Image, Text, View, StyleSheet, TouchableOpacity, ToastAndroid } from 'react-native';
 import InputIcon from '../../components/auth/InputIcon';
+import FirebaseApp from '../../helpers/FirebaseApp';
 import { signInWithEmailAndPassword  } from 'firebase/auth';
 import { collection, getDocs, query, where, limit } from 'firebase/firestore';
-import FirebaseApp from '../../helpers/FirebaseApp';
 
 const Login = ({ navigation }) => {
 
@@ -17,9 +17,13 @@ const Login = ({ navigation }) => {
         // Dismiss keyboard
         Keyboard.dismiss();
 
+        // Set Firebase App Instance
+        const FBApp = new FirebaseApp();
+
         // Signed in 
-        const q = query(collection(FirebaseApp.firestore(), 'users'), where('username', '==', username), limit(1));
+        const q = query(collection(FBApp.firestore(), 'users'), where('username', '==', username), limit(1));
         const userSnapshot = await getDocs(q);
+
         let user;
 
         // Get User
@@ -38,7 +42,7 @@ const Login = ({ navigation }) => {
         }
 
         // Sign In
-        signInWithEmailAndPassword(FirebaseApp.auth(), user.email, password).then((userCredential) => {
+        signInWithEmailAndPassword(FBApp.auth(), user.email, password).then((userCredential) => {
             
             // Show notif
             ToastAndroid.showWithGravity('Welcome back, ' + [user.first_name, user.last_name].join(' '), ToastAndroid.LONG, ToastAndroid.TOP);

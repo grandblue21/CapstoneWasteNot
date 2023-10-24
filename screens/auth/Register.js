@@ -33,14 +33,17 @@ const Register = ({ navigation }) => {
             return false;
         }
 
+        // Set Firebase App Instance
+        const FBApp = new FirebaseApp();
+
         // Register User
-        createUserWithEmailAndPassword(FirebaseApp.auth(), email, password).then(async (userCredential) => {
+        createUserWithEmailAndPassword(FBApp.auth(), email, password).then(async (userCredential) => {
 
             // Signed up 
             const user = userCredential.user;
 
             // Set firestore instance
-            const db = FirebaseApp.firestore();
+            const db = FBApp.firestore();
 
             // Add Document
             await addDoc(collection(db, 'users'), {

@@ -20,15 +20,15 @@ class FirebaseApp {
         this._instance = initializeApp(firebaseConfig);
     }
 
-    static getInstance = () =>  {
+    getInstance = () =>  {
         return this._instance;
     }
 
-    static auth = () => {
+    auth = () => {
         return getAuth();
     }
 
-    static firestore = () => {
+    firestore = () => {
         return getFirestore(this._instance);
     }
 }
